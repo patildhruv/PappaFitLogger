@@ -9,6 +9,7 @@ export default function TodayLog({ todayData, dayNote, onNoteChange, dateStr, ac
   const totalMin = activeActivities.reduce((sum, a) => sum + todayData[a.key], 0);
   const [note, setNote] = useState(dayNote);
   const [sharing, setSharing] = useState(false);
+  const [toast, setToast] = useState(false);
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -19,6 +20,8 @@ export default function TodayLog({ todayData, dayNote, onNoteChange, dateStr, ac
     const trimmed = note.trim();
     if (trimmed !== dayNote) {
       onNoteChange(trimmed);
+      setToast(true);
+      setTimeout(() => setToast(false), 1500);
     }
   }
 
@@ -146,6 +149,25 @@ export default function TodayLog({ todayData, dayNote, onNoteChange, dateStr, ac
           }}
         />
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div
+          style={{
+            marginTop: 8,
+            padding: "6px 12px",
+            borderRadius: 8,
+            background: "#27AE60",
+            color: "#fff",
+            fontSize: 12,
+            fontWeight: 600,
+            textAlign: "center",
+            fontFamily: "'DM Sans', sans-serif",
+          }}
+        >
+          Note saved
+        </div>
+      )}
     </div>
   );
 }
