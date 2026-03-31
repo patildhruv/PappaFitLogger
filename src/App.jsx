@@ -12,6 +12,7 @@ import WeeklyBarChart from "./components/WeeklyBarChart";
 import ActivityDonut from "./components/ActivityDonut";
 import Calendar from "./components/Calendar";
 import Summary from "./components/Summary";
+import DailySummary from "./components/DailySummary";
 import Settings from "./components/Settings";
 
 function SplashScreen({ fading }) {
@@ -248,6 +249,13 @@ export default function App() {
 
           <Summary monthData={monthData} daysInMonth={daysInMonth} />
         </>
+      ) : activeTab === "summary" ? (
+        <DailySummary
+          todayData={todayData}
+          dateStr={dateStr}
+          activeDays={activeDaysThisMonth}
+          daysInMonth={daysInMonth}
+        />
       ) : (
         <History sortedDays={getSortedDays()} />
       )}
