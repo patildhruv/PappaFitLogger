@@ -98,5 +98,10 @@ export function useLogs() {
     });
   }, []);
 
-  return { logs, addLog, getToday, getMonth, getSortedDays, replaceAllLogs, mergeLogs, todayKey };
+  const clearAllLogs = useCallback(() => {
+    setLogs({});
+    saveLogs({});
+  }, []);
+
+  return { logs, addLog, getToday, getMonth, getSortedDays, replaceAllLogs, mergeLogs, clearAllLogs, todayKey };
 }

@@ -1,6 +1,6 @@
-import { ACTIVITIES } from "../data/activities";
+import { useActivities } from "../hooks/useActivities";
 
-function getLast7Days(logs) {
+function getLast7Days(logs, activities) {
   const days = [];
   const today = new Date();
   for (let i = 6; i >= 0; i--) {
@@ -9,7 +9,7 @@ function getLast7Days(logs) {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
     const data = logs[key] || {};
-    const segments = ACTIVITIES.filter((a) => data[a.key]).map((a) => ({
+    const segments = activities.filter((a) => data[a.key]).map((a) => ({
       key: a.key,
       color: a.color,
       minutes: data[a.key],
@@ -21,7 +21,8 @@ function getLast7Days(logs) {
 }
 
 export default function WeeklyBarChart({ logs }) {
-  const days = getLast7Days(logs);
+  const activities = useActivities();
+  const days = getLast7Days(logs, activities);
   const maxTotal = Math.max(...days.map((d) => d.total), 1);
 
   const chartW = 380;

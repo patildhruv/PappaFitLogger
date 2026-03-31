@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ACTIVITIES } from "../data/activities";
+import { useActivities } from "../hooks/useActivities";
 
 export default function NotePrompt({ session, onSave, onSkip }) {
+  const activities = useActivities();
   const [note, setNote] = useState("");
-  const activity = ACTIVITIES.find((a) => a.key === session.activity);
+  const activity = activities.find((a) => a.key === session.activity);
   if (!activity) return null;
 
   return (

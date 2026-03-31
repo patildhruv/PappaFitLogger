@@ -1,10 +1,11 @@
-import { ACTIVITIES } from "../data/activities";
+import { useActivities } from "../hooks/useActivities";
 
 export default function DayCell({ day, data, selected, onSelect, isSunday }) {
+  const activities = useActivities();
   if (day === null) return <div style={{ width: 44, height: 52 }} />;
 
-  const hasActivity = data && ACTIVITIES.some((a) => data[a.key]);
-  const activeActs = ACTIVITIES.filter((a) => data?.[a.key]);
+  const hasActivity = data && activities.some((a) => data[a.key]);
+  const activeActs = activities.filter((a) => data?.[a.key]);
 
   const bgColor =
     selected === day

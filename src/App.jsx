@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import confetti from "canvas-confetti";
 import { useTimer } from "./hooks/useTimer";
 import { useLogs } from "./hooks/useLogs";
-import { ACTIVITIES } from "./data/activities";
+import { useActivities } from "./hooks/useActivities";
 import Timer from "./components/Timer";
 import NotePrompt from "./components/NotePrompt";
 import ActivityButtons from "./components/ActivityButtons";
@@ -65,12 +65,13 @@ export default function App() {
     };
   }, []);
 
-  const { logs, addLog, getToday, getMonth, getSortedDays, replaceAllLogs, mergeLogs } = useLogs();
+  const activities = useActivities();
+  const { logs, addLog, getToday, getMonth, getSortedDays, replaceAllLogs, mergeLogs, clearAllLogs } = useLogs();
 
   const {
     activeTimer, elapsed, isRunning, isPaused, pendingSession,
     startTimer, stopTimer, cancelTimer, pauseTimer, resumeTimer, finalizePendingSession,
-  } = useTimer();
+  } = useTimer(activities);
 
   const handleSessionFinalize = useCallback(
     (noteText) => {
@@ -173,7 +174,7 @@ export default function App() {
 
       {/* Settings Panel */}
       {showSettings && (
-        <Settings logs={logs} onReplace={replaceAllLogs} onMerge={mergeLogs} />
+        <Settings logs={logs} onReplace={replaceAllLogs} onMerge={mergeLogs} onClearAll={clearAllLogs} />
       )}
 
       {/* Stats Row */}
@@ -188,9 +189,9 @@ export default function App() {
             label: "Today",
           },
           {
-            value: ACTIVITIES.filter((a) => todayData[a.key]).length,
+            value: activities.filter((a) => todayData[a.key]).length,
             label: "Activities",
-            sub: `/${ACTIVITIES.length}`,
+            sub: `/${activities.length}`,
           },
         ].map((s, i) => (
           <div

@@ -1,4 +1,4 @@
-import { ACTIVITIES } from "../data/activities";
+import { useActivities } from "../hooks/useActivities";
 
 function formatTime(ms) {
   const totalSec = Math.floor(ms / 1000);
@@ -10,9 +10,10 @@ function formatTime(ms) {
 }
 
 export default function Timer({ activeTimer, elapsed, isPaused, onStop, onCancel, onPause, onResume }) {
+  const activities = useActivities();
   if (!activeTimer) return null;
 
-  const activity = ACTIVITIES.find((a) => a.key === activeTimer.activity);
+  const activity = activities.find((a) => a.key === activeTimer.activity);
   if (!activity) return null;
 
   const handleCancel = () => {

@@ -1,15 +1,16 @@
-import { ACTIVITIES } from "../data/activities";
+import { useActivities } from "../hooks/useActivities";
 
 export default function Summary({ monthData, daysInMonth }) {
+  const activities = useActivities();
   const actCounts = {};
   const totalMinByAct = {};
-  ACTIVITIES.forEach((a) => {
+  activities.forEach((a) => {
     actCounts[a.key] = 0;
     totalMinByAct[a.key] = 0;
   });
 
   Object.values(monthData).forEach((d) => {
-    ACTIVITIES.forEach((a) => {
+    activities.forEach((a) => {
       if (d[a.key]) {
         actCounts[a.key]++;
         totalMinByAct[a.key] += d[a.key];
@@ -41,7 +42,7 @@ export default function Summary({ monthData, daysInMonth }) {
       >
         Monthly Summary
       </div>
-      {ACTIVITIES.map((a) => {
+      {activities.map((a) => {
         const count = actCounts[a.key];
         const mins = totalMinByAct[a.key];
         const pct = daysInMonth > 0 ? (count / daysInMonth) * 100 : 0;

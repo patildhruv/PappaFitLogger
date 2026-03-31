@@ -1,4 +1,4 @@
-import { ACTIVITIES } from "../data/activities";
+import { useActivities } from "../hooks/useActivities";
 
 function formatDate(dateStr) {
   const d = new Date(dateStr + "T00:00:00");
@@ -11,6 +11,7 @@ function formatDate(dateStr) {
 }
 
 export default function History({ sortedDays }) {
+  const activities = useActivities();
   if (sortedDays.length === 0) {
     return (
       <div
@@ -36,7 +37,7 @@ export default function History({ sortedDays }) {
   return (
     <div style={{ maxWidth: 420, width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
       {sortedDays.map((day) => {
-        const activeActs = ACTIVITIES.filter((a) => day[a.key]);
+        const activeActs = activities.filter((a) => day[a.key]);
         const totalMin = activeActs.reduce((s, a) => s + day[a.key], 0);
         const notes = day.notes || [];
 

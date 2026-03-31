@@ -1,7 +1,8 @@
-import { ACTIVITIES } from "../data/activities";
+import { useActivities } from "../hooks/useActivities";
 
 export default function TodayLog({ todayData }) {
-  const activeActivities = ACTIVITIES.filter((a) => todayData[a.key]);
+  const activities = useActivities();
+  const activeActivities = activities.filter((a) => todayData[a.key]);
   const totalMin = activeActivities.reduce((sum, a) => sum + todayData[a.key], 0);
   const notes = todayData.notes || [];
 

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ACTIVITIES } from "../data/activities";
 
 const TIMER_KEY = "pappa-fit-active-timer";
 const PENDING_KEY = "pappa-fit-pending-session";
@@ -52,11 +51,13 @@ function formatTimeShort(ms) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-export function useTimer() {
+export function useTimer(activities) {
   const [activeTimer, setActiveTimer] = useState(loadTimer);
   const [elapsed, setElapsed] = useState(() => computeElapsed(loadTimer()));
   const [pendingSession, setPendingSession] = useState(loadPendingSession);
   const intervalRef = useRef(null);
+  const activitiesRef = useRef(activities);
+  activitiesRef.current = activities;
 
   const isPaused = !!activeTimer?.pausedAt;
 
@@ -66,12 +67,12 @@ export function useTimer() {
       intervalRef.current = setInterval(() => {
         const el = computeElapsed(activeTimer);
         setElapsed(el);
-        const act = ACTIVITIES.find((a) => a.key === activeTimer.activity);
+        const act = activitiesRef.current?.find((a) => a.key === activeTimer.activity);
         document.title = `${act?.emoji || ""} ${formatTimeShort(el)} - PappaFit`;
       }, 1000);
     } else if (activeTimer && activeTimer.pausedAt) {
       setElapsed(computeElapsed(activeTimer));
-      const act = ACTIVITIES.find((a) => a.key === activeTimer.activity);
+      const act = activitiesRef.current?.find((a) => a.key === activeTimer.activity);
       document.title = `⏸ ${act?.label || ""} Paused - PappaFit`;
     } else if (!pendingSession) {
       setElapsed(0);

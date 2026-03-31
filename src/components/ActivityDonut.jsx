@@ -1,10 +1,11 @@
-import { ACTIVITIES } from "../data/activities";
+import { useActivities } from "../hooks/useActivities";
 
 export default function ActivityDonut({ monthData }) {
+  const activities = useActivities();
   const totals = {};
-  ACTIVITIES.forEach((a) => { totals[a.key] = 0; });
+  activities.forEach((a) => { totals[a.key] = 0; });
   Object.values(monthData).forEach((day) => {
-    ACTIVITIES.forEach((a) => {
+    activities.forEach((a) => {
       if (day[a.key]) totals[a.key] += day[a.key];
     });
   });
@@ -19,7 +20,7 @@ export default function ActivityDonut({ monthData }) {
   const circumference = 2 * Math.PI * r;
 
   let offsetAccum = 0;
-  const segments = ACTIVITIES.filter((a) => totals[a.key] > 0).map((a) => {
+  const segments = activities.filter((a) => totals[a.key] > 0).map((a) => {
     const pct = totals[a.key] / grandTotal;
     const dashLen = pct * circumference;
     const seg = {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ACTIVITIES } from "../data/activities";
+import { useActivities } from "../hooks/useActivities";
 import DayCell from "./DayCell";
 
 const DAYS_OF_WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -37,6 +37,7 @@ function buildWeeks(year, month) {
 }
 
 export default function Calendar({ monthData, year, month }) {
+  const activities = useActivities();
   const [selected, setSelected] = useState(null);
   const weeks = buildWeeks(year, month);
   const sundays = getSundays(year, month);
@@ -62,7 +63,7 @@ export default function Calendar({ monthData, year, month }) {
           justifyContent: "center",
         }}
       >
-        {ACTIVITIES.map((a) => (
+        {activities.map((a) => (
           <div key={a.key} style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: a.color }} />
             <span style={{ fontSize: 10, color: "var(--text-secondary)", fontWeight: 500 }}>
@@ -156,9 +157,9 @@ export default function Calendar({ monthData, year, month }) {
               </span>
             )}
           </div>
-          {ACTIVITIES.some((a) => selectedData[a.key]) ? (
+          {activities.some((a) => selectedData[a.key]) ? (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {ACTIVITIES.filter((a) => selectedData[a.key]).map((a) => (
+              {activities.filter((a) => selectedData[a.key]).map((a) => (
                 <div
                   key={a.key}
                   style={{

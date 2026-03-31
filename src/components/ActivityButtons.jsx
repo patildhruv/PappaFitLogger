@@ -1,6 +1,7 @@
-import { ACTIVITIES } from "../data/activities";
+import { useActivities } from "../hooks/useActivities";
 
 export default function ActivityButtons({ onStart, isRunning, activeActivity }) {
+  const activities = useActivities();
   return (
     <div
       style={{
@@ -12,7 +13,7 @@ export default function ActivityButtons({ onStart, isRunning, activeActivity }) 
         marginBottom: 16,
       }}
     >
-      {ACTIVITIES.map((a) => {
+      {activities.map((a) => {
         const isActive = isRunning && activeActivity === a.key;
         const isDisabled = isRunning && !isActive;
         return (
