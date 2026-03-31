@@ -9,10 +9,20 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
       rel="stylesheet"
     />
-    <title>PappaFit Logger</title>
+    <title>PappaFit Logger - Daily Fitness Tracker</title>
+    <meta name="theme-color" content="#fef9f0" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>">
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font-family: 'DM Sans', sans-serif; }
+      @keyframes timerPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+      }
+      @keyframes splashFadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
     </style>
   </head>
   <body>

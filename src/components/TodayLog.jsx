@@ -10,7 +10,7 @@ export default function TodayLog({ todayData }) {
         style={{
           background: "rgba(255,255,255,0.55)",
           borderRadius: 16,
-          padding: 16,
+          padding: "20px 16px",
           maxWidth: 420,
           width: "100%",
           marginBottom: 16,
@@ -18,8 +18,12 @@ export default function TodayLog({ todayData }) {
           textAlign: "center",
         }}
       >
-        <div style={{ fontSize: 12, color: "#999", fontStyle: "italic" }}>
-          No activities logged today. Start a timer above!
+        <div style={{ fontSize: 28, marginBottom: 6 }}>🏃‍♂️</div>
+        <div style={{ fontSize: 13, color: "#888", fontWeight: 500 }}>
+          No activities yet today
+        </div>
+        <div style={{ fontSize: 11, color: "#bbb", marginTop: 4 }}>
+          Tap an activity above to get started!
         </div>
       </div>
     );

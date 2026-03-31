@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTimer } from "./hooks/useTimer";
 import { useLogs } from "./hooks/useLogs";
 import { ACTIVITIES } from "./data/activities";
@@ -8,7 +8,54 @@ import TodayLog from "./components/TodayLog";
 import Calendar from "./components/Calendar";
 import Summary from "./components/Summary";
 
+function SplashScreen({ fading }) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        background: "linear-gradient(145deg, #fef9f0 0%, #f0ebe3 40%, #e8e0d4 100%)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        animation: fading ? "splashFadeOut 0.5s ease forwards" : "none",
+      }}
+    >
+      <div style={{ fontSize: 56, marginBottom: 12 }}>💪</div>
+      <h1
+        style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 30,
+          fontWeight: 800,
+          color: "#1a1a2e",
+          margin: "0 0 6px 0",
+          textAlign: "center",
+        }}
+      >
+        PappaFit Logger
+      </h1>
+      <div style={{ fontSize: 13, color: "#888", fontWeight: 500 }}>
+        Daily Fitness Tracker
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashFading, setSplashFading] = useState(false);
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setSplashFading(true), 1500);
+    const hideTimer = setTimeout(() => setShowSplash(false), 2000);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
+  }, []);
+
   const { logs, addLog, getToday, getMonth } = useLogs();
 
   const handleTimerComplete = useCallback(
@@ -18,8 +65,10 @@ export default function App() {
     [addLog]
   );
 
-  const { activeTimer, elapsed, isRunning, startTimer, stopTimer, cancelTimer } =
-    useTimer(handleTimerComplete);
+  const {
+    activeTimer, elapsed, isRunning, isPaused,
+    startTimer, stopTimer, cancelTimer, pauseTimer, resumeTimer,
+  } = useTimer(handleTimerComplete);
 
   const now = new Date();
   const year = now.getFullYear();
@@ -27,6 +76,13 @@ export default function App() {
   const daysInMonth = new Date(year, month, 0).getDate();
   const monthData = getMonth(year, month);
   const todayData = getToday();
+
+  const dateStr = now.toLocaleDateString("en-IN", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   const totalMin = Object.values(todayData).reduce((s, v) => s + (typeof v === "number" ? v : 0), 0);
   const activeDaysThisMonth = Object.keys(monthData).length;
@@ -43,6 +99,8 @@ export default function App() {
         alignItems: "center",
       }}
     >
+      {showSplash && <SplashScreen fading={splashFading} />}
+
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 20, maxWidth: 420, width: "100%" }}>
         <div
@@ -63,14 +121,14 @@ export default function App() {
             fontSize: 32,
             fontWeight: 800,
             color: "#1a1a2e",
-            margin: "0 0 2px 0",
+            margin: "0 0 4px 0",
             lineHeight: 1.1,
           }}
         >
           Swapnil's Tracker
         </h1>
         <div style={{ fontSize: 13, color: "#777", fontWeight: 500 }}>
-          Tap an activity to start the timer
+          {dateStr}
         </div>
       </div>
 
@@ -129,8 +187,11 @@ export default function App() {
       <Timer
         activeTimer={activeTimer}
         elapsed={elapsed}
+        isPaused={isPaused}
         onStop={stopTimer}
         onCancel={cancelTimer}
+        onPause={pauseTimer}
+        onResume={resumeTimer}
       />
 
       {/* Activity Buttons */}
