@@ -154,7 +154,7 @@ export default function App() {
             lineHeight: 1.1,
           }}
         >
-          Swapnil's Tracker
+          Pappa's Tracker
         </h1>
         <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>
           {dateStr}

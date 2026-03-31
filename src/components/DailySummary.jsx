@@ -88,7 +88,7 @@ export default function DailySummary({ todayData, dateStr, activeDays, daysInMon
             {dateStr}
           </div>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 500 }}>
-            Swapnil's Tracker
+            Pappa's Tracker
           </div>
         </div>
 
