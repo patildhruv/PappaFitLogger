@@ -20,20 +20,20 @@ export default function Summary({ monthData, daysInMonth }) {
   return (
     <div
       style={{
-        background: "rgba(255,255,255,0.55)",
+        background: "var(--card-bg)",
         backdropFilter: "blur(12px)",
         borderRadius: 18,
         padding: 16,
         maxWidth: 420,
         width: "100%",
-        border: "1px solid rgba(0,0,0,0.06)",
+        border: "1px solid var(--card-border)",
       }}
     >
       <div
         style={{
           fontSize: 12,
           fontWeight: 700,
-          color: "#1a1a2e",
+          color: "var(--text-primary)",
           marginBottom: 12,
           letterSpacing: 0.5,
           textTransform: "uppercase",
@@ -48,14 +48,14 @@ export default function Summary({ monthData, daysInMonth }) {
         return (
           <div key={a.key} style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#555" }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)" }}>
                 {a.emoji} {a.label}
               </span>
-              <span style={{ fontSize: 11, color: "#777" }}>
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
                 <span style={{ fontWeight: 700, color: a.color }}>{count}</span>
-                <span style={{ color: "#bbb" }}>/{daysInMonth} days</span>
+                <span style={{ color: "var(--text-faint)" }}>/{daysInMonth} days</span>
                 {mins > 0 && (
-                  <span style={{ marginLeft: 6, color: "#aaa" }}>
+                  <span style={{ marginLeft: 6, color: "var(--text-faint)" }}>
                     ({Math.floor(mins / 60) > 0 ? `${Math.floor(mins / 60)}h` : ""}
                     {mins % 60 > 0 ? ` ${mins % 60}m` : ""})
                   </span>
@@ -65,7 +65,7 @@ export default function Summary({ monthData, daysInMonth }) {
             <div
               style={{
                 height: 6,
-                background: "rgba(0,0,0,0.05)",
+                background: "var(--bar-track)",
                 borderRadius: 3,
                 overflow: "hidden",
               }}

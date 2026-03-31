@@ -12,8 +12,8 @@ export default function DayCell({ day, data, selected, onSelect, isSunday }) {
       : isSunday && !hasActivity
       ? "rgba(155,81,224,0.06)"
       : hasActivity
-      ? "rgba(255,255,255,0.6)"
-      : "rgba(255,255,255,0.35)";
+      ? "var(--card-bg-strong)"
+      : "var(--card-bg)";
 
   return (
     <div
@@ -33,7 +33,7 @@ export default function DayCell({ day, data, selected, onSelect, isSunday }) {
             ? "2px solid #2D9CDB"
             : isSunday
             ? "1.5px dashed rgba(155,81,224,0.25)"
-            : "1.5px solid rgba(0,0,0,0.06)",
+            : "1.5px solid var(--card-border)",
         transition: "all 0.2s ease",
       }}
     >
@@ -41,7 +41,7 @@ export default function DayCell({ day, data, selected, onSelect, isSunday }) {
         style={{
           fontSize: 13,
           fontWeight: 600,
-          color: isSunday && !hasActivity ? "#b388d9" : "#1a1a2e",
+          color: isSunday && !hasActivity ? "var(--sunday-color)" : "var(--text-primary)",
           fontFamily: "'DM Sans', sans-serif",
         }}
       >
@@ -69,7 +69,7 @@ export default function DayCell({ day, data, selected, onSelect, isSunday }) {
           />
         ))}
         {isSunday && !hasActivity && (
-          <span style={{ fontSize: 8, color: "#b388d9" }}>rest</span>
+          <span style={{ fontSize: 8, color: "var(--sunday-color)" }}>rest</span>
         )}
       </div>
     </div>

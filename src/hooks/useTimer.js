@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ACTIVITIES } from "../data/activities";
 
-const STORAGE_KEY = "pappa-fit-active-timer";
+const TIMER_KEY = "pappa-fit-active-timer";
+const PENDING_KEY = "pappa-fit-pending-session";
 const DEFAULT_TITLE = "PappaFit Logger - Daily Fitness Tracker";
 
 function loadTimer() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(TIMER_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -15,9 +16,26 @@ function loadTimer() {
 
 function saveTimer(timer) {
   if (timer) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(timer));
+    localStorage.setItem(TIMER_KEY, JSON.stringify(timer));
   } else {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(TIMER_KEY);
+  }
+}
+
+function loadPendingSession() {
+  try {
+    const raw = localStorage.getItem(PENDING_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function savePendingSession(session) {
+  if (session) {
+    localStorage.setItem(PENDING_KEY, JSON.stringify(session));
+  } else {
+    localStorage.removeItem(PENDING_KEY);
   }
 }
 
@@ -34,9 +52,10 @@ function formatTimeShort(ms) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-export function useTimer(onComplete) {
+export function useTimer() {
   const [activeTimer, setActiveTimer] = useState(loadTimer);
   const [elapsed, setElapsed] = useState(() => computeElapsed(loadTimer()));
+  const [pendingSession, setPendingSession] = useState(loadPendingSession);
   const intervalRef = useRef(null);
 
   const isPaused = !!activeTimer?.pausedAt;
@@ -54,14 +73,14 @@ export function useTimer(onComplete) {
       setElapsed(computeElapsed(activeTimer));
       const act = ACTIVITIES.find((a) => a.key === activeTimer.activity);
       document.title = `⏸ ${act?.label || ""} Paused - PappaFit`;
-    } else {
+    } else if (!pendingSession) {
       setElapsed(0);
       document.title = DEFAULT_TITLE;
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [activeTimer]);
+  }, [activeTimer, pendingSession]);
 
   const startTimer = useCallback((activityKey) => {
     const timer = {
@@ -96,14 +115,19 @@ export function useTimer(onComplete) {
   const stopTimer = useCallback(() => {
     if (!activeTimer) return;
     const elapsedMs = computeElapsed(activeTimer);
-    const minutes = Math.round(elapsedMs / 60000);
-    if (onComplete) {
-      onComplete(activeTimer.activity, Math.max(1, minutes));
-    }
+    const minutes = Math.max(1, Math.round(elapsedMs / 60000));
+    const session = { activity: activeTimer.activity, minutes };
+    setPendingSession(session);
+    savePendingSession(session);
     setActiveTimer(null);
     saveTimer(null);
     document.title = DEFAULT_TITLE;
-  }, [activeTimer, onComplete]);
+  }, [activeTimer]);
+
+  const finalizePendingSession = useCallback(() => {
+    setPendingSession(null);
+    savePendingSession(null);
+  }, []);
 
   const cancelTimer = useCallback(() => {
     setActiveTimer(null);
@@ -116,10 +140,12 @@ export function useTimer(onComplete) {
     elapsed,
     isRunning: !!activeTimer,
     isPaused,
+    pendingSession,
     startTimer,
     stopTimer,
     cancelTimer,
     pauseTimer,
     resumeTimer,
+    finalizePendingSession,
   };
 }

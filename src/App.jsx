@@ -1,12 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
+import confetti from "canvas-confetti";
 import { useTimer } from "./hooks/useTimer";
 import { useLogs } from "./hooks/useLogs";
 import { ACTIVITIES } from "./data/activities";
 import Timer from "./components/Timer";
+import NotePrompt from "./components/NotePrompt";
 import ActivityButtons from "./components/ActivityButtons";
 import TodayLog from "./components/TodayLog";
+import TabBar from "./components/TabBar";
+import History from "./components/History";
+import WeeklyBarChart from "./components/WeeklyBarChart";
+import ActivityDonut from "./components/ActivityDonut";
 import Calendar from "./components/Calendar";
 import Summary from "./components/Summary";
+import Settings from "./components/Settings";
 
 function SplashScreen({ fading }) {
   return (
@@ -15,7 +22,7 @@ function SplashScreen({ fading }) {
         position: "fixed",
         inset: 0,
         zIndex: 1000,
-        background: "linear-gradient(145deg, #fef9f0 0%, #f0ebe3 40%, #e8e0d4 100%)",
+        background: "linear-gradient(145deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 40%, var(--bg-gradient-3) 100%)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -29,14 +36,14 @@ function SplashScreen({ fading }) {
           fontFamily: "'Playfair Display', serif",
           fontSize: 30,
           fontWeight: 800,
-          color: "#1a1a2e",
+          color: "var(--text-primary)",
           margin: "0 0 6px 0",
           textAlign: "center",
         }}
       >
         PappaFit Logger
       </h1>
-      <div style={{ fontSize: 13, color: "#888", fontWeight: 500 }}>
+      <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>
         Daily Fitness Tracker
       </div>
     </div>
@@ -46,6 +53,8 @@ function SplashScreen({ fading }) {
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [splashFading, setSplashFading] = useState(false);
+  const [activeTab, setActiveTab] = useState("today");
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     const fadeTimer = setTimeout(() => setSplashFading(true), 1500);
@@ -56,19 +65,31 @@ export default function App() {
     };
   }, []);
 
-  const { logs, addLog, getToday, getMonth } = useLogs();
-
-  const handleTimerComplete = useCallback(
-    (activityKey, minutes) => {
-      addLog(activityKey, minutes);
-    },
-    [addLog]
-  );
+  const { logs, addLog, getToday, getMonth, getSortedDays, replaceAllLogs, mergeLogs } = useLogs();
 
   const {
-    activeTimer, elapsed, isRunning, isPaused,
-    startTimer, stopTimer, cancelTimer, pauseTimer, resumeTimer,
-  } = useTimer(handleTimerComplete);
+    activeTimer, elapsed, isRunning, isPaused, pendingSession,
+    startTimer, stopTimer, cancelTimer, pauseTimer, resumeTimer, finalizePendingSession,
+  } = useTimer();
+
+  const handleSessionFinalize = useCallback(
+    (noteText) => {
+      if (pendingSession) {
+        addLog(pendingSession.activity, pendingSession.minutes, noteText || undefined);
+        finalizePendingSession();
+        confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+      }
+    },
+    [pendingSession, addLog, finalizePendingSession]
+  );
+
+  const handleSessionSkip = useCallback(() => {
+    if (pendingSession) {
+      addLog(pendingSession.activity, pendingSession.minutes);
+      finalizePendingSession();
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+    }
+  }, [pendingSession, addLog, finalizePendingSession]);
 
   const now = new Date();
   const year = now.getFullYear();
@@ -91,7 +112,7 @@ export default function App() {
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(145deg, #fef9f0 0%, #f0ebe3 40%, #e8e0d4 100%)",
+        background: "linear-gradient(145deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 40%, var(--bg-gradient-3) 100%)",
         fontFamily: "'DM Sans', sans-serif",
         padding: "20px 16px",
         display: "flex",
@@ -102,13 +123,31 @@ export default function App() {
       {showSplash && <SplashScreen fading={splashFading} />}
 
       {/* Header */}
-      <div style={{ textAlign: "center", marginBottom: 20, maxWidth: 420, width: "100%" }}>
+      <div style={{ textAlign: "center", marginBottom: 20, maxWidth: 420, width: "100%", position: "relative" }}>
+        {/* Settings gear */}
+        <button
+          onClick={() => setShowSettings((s) => !s)}
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            background: "none",
+            border: "none",
+            fontSize: 20,
+            cursor: "pointer",
+            padding: 4,
+            opacity: 0.5,
+          }}
+          aria-label="Settings"
+        >
+          ⚙️
+        </button>
         <div
           style={{
             fontSize: 11,
             fontWeight: 600,
             letterSpacing: 3,
-            color: "#999",
+            color: "var(--text-hint)",
             textTransform: "uppercase",
             marginBottom: 4,
           }}
@@ -120,17 +159,22 @@ export default function App() {
             fontFamily: "'Playfair Display', serif",
             fontSize: 32,
             fontWeight: 800,
-            color: "#1a1a2e",
+            color: "var(--text-primary)",
             margin: "0 0 4px 0",
             lineHeight: 1.1,
           }}
         >
           Swapnil's Tracker
         </h1>
-        <div style={{ fontSize: 13, color: "#777", fontWeight: 500 }}>
+        <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>
           {dateStr}
         </div>
       </div>
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <Settings logs={logs} onReplace={replaceAllLogs} onMerge={mergeLogs} />
+      )}
 
       {/* Stats Row */}
       <div style={{ display: "flex", gap: 10, marginBottom: 18, maxWidth: 420, width: "100%" }}>
@@ -153,24 +197,24 @@ export default function App() {
             key={i}
             style={{
               flex: 1,
-              background: "rgba(255,255,255,0.7)",
+              background: "var(--card-bg-strong)",
               backdropFilter: "blur(10px)",
               borderRadius: 14,
               padding: "12px 8px",
               textAlign: "center",
-              border: "1px solid rgba(0,0,0,0.05)",
+              border: "1px solid var(--card-border-strong)",
             }}
           >
-            <div style={{ fontSize: 22, fontWeight: 700, color: "#1a1a2e", lineHeight: 1 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>
               {s.value}
               {s.sub && (
-                <span style={{ fontSize: 12, color: "#999", fontWeight: 500 }}>{s.sub}</span>
+                <span style={{ fontSize: 12, color: "var(--text-hint)", fontWeight: 500 }}>{s.sub}</span>
               )}
             </div>
             <div
               style={{
                 fontSize: 10,
-                color: "#888",
+                color: "var(--text-muted)",
                 fontWeight: 600,
                 marginTop: 4,
                 letterSpacing: 0.5,
@@ -183,34 +227,58 @@ export default function App() {
         ))}
       </div>
 
-      {/* Timer */}
-      <Timer
-        activeTimer={activeTimer}
-        elapsed={elapsed}
-        isPaused={isPaused}
-        onStop={stopTimer}
-        onCancel={cancelTimer}
-        onPause={pauseTimer}
-        onResume={resumeTimer}
-      />
+      {/* Tab Bar */}
+      <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Activity Buttons */}
-      <ActivityButtons
-        onStart={startTimer}
-        isRunning={isRunning}
-        activeActivity={activeTimer?.activity}
-      />
+      {activeTab === "today" ? (
+        <>
+          {/* Timer */}
+          <Timer
+            activeTimer={activeTimer}
+            elapsed={elapsed}
+            isPaused={isPaused}
+            onStop={stopTimer}
+            onCancel={cancelTimer}
+            onPause={pauseTimer}
+            onResume={resumeTimer}
+          />
 
-      {/* Today's Log */}
-      <TodayLog todayData={todayData} />
+          {/* Note Prompt */}
+          {pendingSession && (
+            <NotePrompt
+              session={pendingSession}
+              onSave={handleSessionFinalize}
+              onSkip={handleSessionSkip}
+            />
+          )}
 
-      {/* Calendar */}
-      <Calendar monthData={monthData} year={year} month={month} />
+          {/* Activity Buttons */}
+          {!pendingSession && (
+            <ActivityButtons
+              onStart={startTimer}
+              isRunning={isRunning}
+              activeActivity={activeTimer?.activity}
+            />
+          )}
 
-      {/* Monthly Summary */}
-      <Summary monthData={monthData} daysInMonth={daysInMonth} />
+          {/* Today's Log */}
+          <TodayLog todayData={todayData} />
 
-      <div style={{ marginTop: 16, fontSize: 10, color: "#bbb", textAlign: "center" }}>
+          {/* Charts */}
+          <WeeklyBarChart logs={logs} />
+          <ActivityDonut monthData={monthData} />
+
+          {/* Calendar */}
+          <Calendar monthData={monthData} year={year} month={month} />
+
+          {/* Monthly Summary */}
+          <Summary monthData={monthData} daysInMonth={daysInMonth} />
+        </>
+      ) : (
+        <History sortedDays={getSortedDays()} />
+      )}
+
+      <div style={{ marginTop: 16, fontSize: 10, color: "var(--text-faint)", textAlign: "center" }}>
         Consistency is the real strength
       </div>
     </div>

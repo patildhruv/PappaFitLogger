@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fef9f0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="apple-touch-icon" href="/PappaFitLogger/icons/icon-192.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -10,11 +15,59 @@
       rel="stylesheet"
     />
     <title>PappaFit Logger - Daily Fitness Tracker</title>
-    <meta name="theme-color" content="#fef9f0" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>">
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font-family: 'DM Sans', sans-serif; }
+
+      :root {
+        --bg-gradient-1: #fef9f0;
+        --bg-gradient-2: #f0ebe3;
+        --bg-gradient-3: #e8e0d4;
+        --text-primary: #1a1a2e;
+        --text-secondary: #555;
+        --text-muted: #888;
+        --text-faint: #bbb;
+        --text-hint: #999;
+        --card-bg: rgba(255,255,255,0.55);
+        --card-bg-strong: rgba(255,255,255,0.7);
+        --card-border: rgba(0,0,0,0.06);
+        --card-border-strong: rgba(0,0,0,0.05);
+        --button-muted-bg: rgba(0,0,0,0.06);
+        --button-muted-color: #888;
+        --button-disabled-bg: rgba(0,0,0,0.03);
+        --bar-track: rgba(0,0,0,0.05);
+        --sunday-color: #b388d9;
+        --note-bg: rgba(0,0,0,0.03);
+        --input-bg: rgba(0,0,0,0.04);
+        --input-border: rgba(0,0,0,0.1);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-gradient-1: #1a1a2e;
+          --bg-gradient-2: #16213e;
+          --bg-gradient-3: #0f3460;
+          --text-primary: #e8e0d4;
+          --text-secondary: #ccc;
+          --text-muted: #999;
+          --text-faint: #555;
+          --text-hint: #777;
+          --card-bg: rgba(255,255,255,0.08);
+          --card-bg-strong: rgba(255,255,255,0.12);
+          --card-border: rgba(255,255,255,0.1);
+          --card-border-strong: rgba(255,255,255,0.08);
+          --button-muted-bg: rgba(255,255,255,0.1);
+          --button-muted-color: #aaa;
+          --button-disabled-bg: rgba(255,255,255,0.05);
+          --bar-track: rgba(255,255,255,0.1);
+          --sunday-color: #c9a0f0;
+          --note-bg: rgba(255,255,255,0.06);
+          --input-bg: rgba(255,255,255,0.08);
+          --input-border: rgba(255,255,255,0.15);
+        }
+      }
+
       @keyframes timerPulse {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.7; }

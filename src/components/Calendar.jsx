@@ -17,7 +17,6 @@ function getSundays(year, month) {
 function buildWeeks(year, month) {
   const firstDay = new Date(year, month - 1, 1);
   const daysInMonth = new Date(year, month, 0).getDate();
-  // Monday=0 ... Sunday=6
   let startOffset = (firstDay.getDay() + 6) % 7;
   const weeks = [];
   let currentDay = 1 - startOffset;
@@ -66,7 +65,7 @@ export default function Calendar({ monthData, year, month }) {
         {ACTIVITIES.map((a) => (
           <div key={a.key} style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: a.color }} />
-            <span style={{ fontSize: 10, color: "#666", fontWeight: 500 }}>
+            <span style={{ fontSize: 10, color: "var(--text-secondary)", fontWeight: 500 }}>
               {a.emoji} {a.label}
             </span>
           </div>
@@ -76,17 +75,17 @@ export default function Calendar({ monthData, year, month }) {
       {/* Calendar Grid */}
       <div
         style={{
-          background: "rgba(255,255,255,0.55)",
+          background: "var(--card-bg)",
           backdropFilter: "blur(12px)",
           borderRadius: 18,
           padding: "14px 12px",
           maxWidth: 420,
           width: "100%",
-          border: "1px solid rgba(0,0,0,0.06)",
+          border: "1px solid var(--card-border)",
           marginBottom: 16,
         }}
       >
-        <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1a2e", textAlign: "center", marginBottom: 10 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", textAlign: "center", marginBottom: 10 }}>
           {monthNames[month - 1]} {year}
         </div>
         <div style={{ display: "flex", justifyContent: "space-around", marginBottom: 8 }}>
@@ -98,7 +97,7 @@ export default function Calendar({ monthData, year, month }) {
                 textAlign: "center",
                 fontSize: 10,
                 fontWeight: 700,
-                color: d === "Sun" ? "#b388d9" : "#aaa",
+                color: d === "Sun" ? "var(--sunday-color)" : "var(--text-faint)",
                 letterSpacing: 0.5,
                 textTransform: "uppercase",
               }}
@@ -128,18 +127,18 @@ export default function Calendar({ monthData, year, month }) {
       {selectedData && (
         <div
           style={{
-            background: "rgba(255,255,255,0.75)",
+            background: "var(--card-bg-strong)",
             backdropFilter: "blur(12px)",
             borderRadius: 16,
             padding: 16,
             maxWidth: 420,
             width: "100%",
-            border: "1px solid rgba(0,0,0,0.06)",
+            border: "1px solid var(--card-border)",
             marginBottom: 16,
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e" }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
               {monthNames[month - 1]} {selected}, {year}
             </div>
             {isSundaySelected && (
@@ -175,14 +174,33 @@ export default function Calendar({ monthData, year, month }) {
                   <span style={{ fontSize: 14 }}>{a.emoji}</span>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: a.color }}>{a.label}</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1a2e" }}>{selectedData[a.key]} min</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>{selectedData[a.key]} min</div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ fontSize: 12, color: "#999", fontStyle: "italic" }}>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", fontStyle: "italic" }}>
               {isSundaySelected ? "Rest day" : "No exercises logged"}
+            </div>
+          )}
+          {selectedData.notes && selectedData.notes.length > 0 && (
+            <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 4 }}>
+              {selectedData.notes.map((n, i) => (
+                <div
+                  key={i}
+                  style={{
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                    fontStyle: "italic",
+                    background: "var(--note-bg)",
+                    borderRadius: 8,
+                    padding: "5px 10px",
+                  }}
+                >
+                  📝 {n.text}
+                </div>
+              ))}
             </div>
           )}
         </div>

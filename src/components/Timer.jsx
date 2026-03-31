@@ -34,11 +34,11 @@ export default function Timer({ activeTimer, elapsed, isPaused, onStop, onCancel
         textAlign: "center",
       }}
     >
-      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: isPaused ? "#999" : activity.color, textTransform: "uppercase", marginBottom: 6 }}>
+      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 2, color: isPaused ? "var(--text-muted)" : activity.color, textTransform: "uppercase", marginBottom: 6 }}>
         {isPaused ? "Timer Paused" : "Timer Running"}
       </div>
       <div style={{ fontSize: 36, marginBottom: 4 }}>{activity.emoji}</div>
-      <div style={{ fontSize: 16, fontWeight: 700, color: "#1a1a2e", marginBottom: 8 }}>
+      <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8 }}>
         {activity.label}
       </div>
       <div
@@ -46,7 +46,7 @@ export default function Timer({ activeTimer, elapsed, isPaused, onStop, onCancel
           fontFamily: "'DM Sans', monospace",
           fontSize: 42,
           fontWeight: 700,
-          color: isPaused ? "#999" : activity.color,
+          color: isPaused ? "var(--text-muted)" : activity.color,
           letterSpacing: 2,
           marginBottom: 16,
           animation: isPaused ? "none" : "timerPulse 2s ease-in-out infinite",
@@ -92,8 +92,8 @@ export default function Timer({ activeTimer, elapsed, isPaused, onStop, onCancel
           <button
             onClick={onPause}
             style={{
-              background: "rgba(0,0,0,0.06)",
-              color: "#666",
+              background: "var(--button-muted-bg)",
+              color: "var(--button-muted-color)",
               border: "none",
               borderRadius: 12,
               padding: "10px 24px",
@@ -109,8 +109,8 @@ export default function Timer({ activeTimer, elapsed, isPaused, onStop, onCancel
         <button
           onClick={handleCancel}
           style={{
-            background: "rgba(0,0,0,0.04)",
-            color: "#aaa",
+            background: "var(--button-disabled-bg)",
+            color: "var(--text-faint)",
             border: "none",
             borderRadius: 12,
             padding: "10px 16px",

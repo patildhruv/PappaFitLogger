@@ -23,17 +23,21 @@ function todayKey() {
 export function useLogs() {
   const [logs, setLogs] = useState(loadLogs);
 
-  const addLog = useCallback((activityKey, minutes) => {
+  const addLog = useCallback((activityKey, minutes, noteText) => {
     const key = todayKey();
     setLogs((prev) => {
       const dayLog = prev[key] || {};
-      const updated = {
-        ...prev,
-        [key]: {
-          ...dayLog,
-          [activityKey]: (dayLog[activityKey] || 0) + minutes,
-        },
+      const notes = dayLog.notes || [];
+      const updatedDay = {
+        ...dayLog,
+        [activityKey]: (dayLog[activityKey] || 0) + minutes,
       };
+      if (noteText) {
+        updatedDay.notes = [...notes, { activity: activityKey, text: noteText, minutes }];
+      } else if (notes.length > 0) {
+        updatedDay.notes = notes;
+      }
+      const updated = { ...prev, [key]: updatedDay };
       saveLogs(updated);
       return updated;
     });
@@ -58,5 +62,41 @@ export function useLogs() {
     [logs]
   );
 
-  return { logs, addLog, getToday, getMonth, todayKey };
+  const getSortedDays = useCallback(() => {
+    return Object.entries(logs)
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([date, data]) => ({ date, ...data }));
+  }, [logs]);
+
+  const replaceAllLogs = useCallback((newLogs) => {
+    setLogs(newLogs);
+    saveLogs(newLogs);
+  }, []);
+
+  const mergeLogs = useCallback((importedLogs) => {
+    setLogs((prev) => {
+      const merged = { ...prev };
+      Object.entries(importedLogs).forEach(([dateKey, dayData]) => {
+        if (!merged[dateKey]) {
+          merged[dateKey] = dayData;
+        } else {
+          const existing = merged[dateKey];
+          const mergedDay = { ...existing };
+          Object.entries(dayData).forEach(([k, v]) => {
+            if (k === "notes") {
+              const existingNotes = mergedDay.notes || [];
+              mergedDay.notes = [...existingNotes, ...(v || [])];
+            } else if (typeof v === "number") {
+              mergedDay[k] = Math.max(mergedDay[k] || 0, v);
+            }
+          });
+          merged[dateKey] = mergedDay;
+        }
+      });
+      saveLogs(merged);
+      return merged;
+    });
+  }, []);
+
+  return { logs, addLog, getToday, getMonth, getSortedDays, replaceAllLogs, mergeLogs, todayKey };
 }

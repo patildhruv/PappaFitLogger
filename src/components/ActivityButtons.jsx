@@ -27,12 +27,12 @@ export default function ActivityButtons({ onStart, isRunning, activeActivity }) 
               gap: 4,
               padding: "14px 8px",
               borderRadius: 14,
-              border: isActive ? `2px solid ${a.color}` : "1.5px solid rgba(0,0,0,0.06)",
+              border: isActive ? `2px solid ${a.color}` : "1.5px solid var(--card-border)",
               background: isActive
                 ? `${a.color}15`
                 : isDisabled
-                ? "rgba(0,0,0,0.03)"
-                : "rgba(255,255,255,0.7)",
+                ? "var(--button-disabled-bg)"
+                : "var(--card-bg-strong)",
               cursor: isDisabled ? "not-allowed" : "pointer",
               opacity: isDisabled ? 0.4 : 1,
               transition: "all 0.2s ease",
@@ -44,7 +44,7 @@ export default function ActivityButtons({ onStart, isRunning, activeActivity }) 
               style={{
                 fontSize: 11,
                 fontWeight: 600,
-                color: isActive ? a.color : "#555",
+                color: isActive ? a.color : "var(--text-secondary)",
               }}
             >
               {a.label}
