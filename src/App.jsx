@@ -10,6 +10,7 @@ import TabBar from "./components/TabBar";
 import MonthlyView from "./components/MonthlyView";
 import History from "./components/History";
 import WeeklyBarChart from "./components/WeeklyBarChart";
+import ManualLogger from "./components/ManualLogger";
 import Settings from "./components/Settings";
 
 function SplashScreen({ fading }) {
@@ -52,6 +53,15 @@ export default function App() {
   const [splashFading, setSplashFading] = useState(false);
   const [activeTab, setActiveTab] = useState("today");
   const [showSettings, setShowSettings] = useState(false);
+  const [inputMode, setInputMode] = useState(() => localStorage.getItem("pappa-fit-input-mode") || "timer");
+
+  function toggleInputMode() {
+    setInputMode((m) => {
+      const next = m === "timer" ? "manual" : "timer";
+      localStorage.setItem("pappa-fit-input-mode", next);
+      return next;
+    });
+  }
 
   useEffect(() => {
     const fadeTimer = setTimeout(() => setSplashFading(true), 1500);
@@ -112,6 +122,26 @@ export default function App() {
 
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 20, maxWidth: 420, width: "100%", position: "relative" }}>
+        {/* Mode toggle - left */}
+        <button
+          onClick={toggleInputMode}
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            background: "none",
+            border: "none",
+            fontSize: 20,
+            cursor: "pointer",
+            padding: 4,
+            opacity: 0.5,
+          }}
+          aria-label={inputMode === "timer" ? "Switch to manual mode" : "Switch to timer mode"}
+          title={inputMode === "timer" ? "Manual mode" : "Timer mode"}
+        >
+          {inputMode === "timer" ? "✏️" : "⏱️"}
+        </button>
+        {/* Settings - right */}
         <button
           onClick={() => setShowSettings((s) => !s)}
           style={{
@@ -217,21 +247,26 @@ export default function App() {
 
       {activeTab === "today" ? (
         <>
-          <Timer
-            activeTimer={activeTimer}
-            elapsed={elapsed}
-            isPaused={isPaused}
-            onStop={stopTimer}
-            onCancel={cancelTimer}
-            onPause={pauseTimer}
-            onResume={resumeTimer}
-          />
-
-          <ActivityButtons
-            onStart={startTimer}
-            isRunning={isRunning}
-            activeActivity={activeTimer?.activity}
-          />
+          {inputMode === "timer" ? (
+            <>
+              <Timer
+                activeTimer={activeTimer}
+                elapsed={elapsed}
+                isPaused={isPaused}
+                onStop={stopTimer}
+                onCancel={cancelTimer}
+                onPause={pauseTimer}
+                onResume={resumeTimer}
+              />
+              <ActivityButtons
+                onStart={startTimer}
+                isRunning={isRunning}
+                activeActivity={activeTimer?.activity}
+              />
+            </>
+          ) : (
+            <ManualLogger todayData={todayData} onLog={addLog} />
+          )}
 
           <TodayLog
             todayData={todayData}
