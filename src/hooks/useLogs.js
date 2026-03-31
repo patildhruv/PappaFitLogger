@@ -11,8 +11,12 @@ function loadLogs() {
   }
 }
 
-function saveLogs(logs) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+function safeSave(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {
+    // quota exceeded — silently fail, data is still in React state
+  }
 }
 
 function todayKey() {
@@ -34,7 +38,23 @@ export function useLogs() {
           [activityKey]: (dayLog[activityKey] || 0) + minutes,
         },
       };
-      saveLogs(updated);
+      safeSave(STORAGE_KEY, updated);
+      return updated;
+    });
+  }, []);
+
+  const editLog = useCallback((dateKey, activityKey, newMinutes) => {
+    setLogs((prev) => {
+      const dayLog = prev[dateKey];
+      if (!dayLog) return prev;
+      const updatedDay = { ...dayLog };
+      if (newMinutes <= 0) {
+        delete updatedDay[activityKey];
+      } else {
+        updatedDay[activityKey] = newMinutes;
+      }
+      const updated = { ...prev, [dateKey]: updatedDay };
+      safeSave(STORAGE_KEY, updated);
       return updated;
     });
   }, []);
@@ -49,7 +69,7 @@ export function useLogs() {
         delete updatedDay.note;
       }
       const updated = { ...prev, [dateKey]: updatedDay };
-      saveLogs(updated);
+      safeSave(STORAGE_KEY, updated);
       return updated;
     });
   }, []);
@@ -81,7 +101,7 @@ export function useLogs() {
 
   const replaceAllLogs = useCallback((newLogs) => {
     setLogs(newLogs);
-    saveLogs(newLogs);
+    safeSave(STORAGE_KEY, newLogs);
   }, []);
 
   const mergeLogs = useCallback((importedLogs) => {
@@ -99,21 +119,21 @@ export function useLogs() {
             } else if (k === "notes") {
               // backward compat: ignore old per-activity notes array
             } else if (typeof v === "number") {
-              mergedDay[k] = Math.max(mergedDay[k] || 0, v);
+              mergedDay[k] = (mergedDay[k] || 0) + v;
             }
           });
           merged[dateKey] = mergedDay;
         }
       });
-      saveLogs(merged);
+      safeSave(STORAGE_KEY, merged);
       return merged;
     });
   }, []);
 
   const clearAllLogs = useCallback(() => {
     setLogs({});
-    saveLogs({});
+    safeSave(STORAGE_KEY, {});
   }, []);
 
-  return { logs, addLog, setDayNote, getToday, getMonth, getSortedDays, replaceAllLogs, mergeLogs, clearAllLogs, todayKey };
+  return { logs, addLog, editLog, setDayNote, getToday, getMonth, getSortedDays, replaceAllLogs, mergeLogs, clearAllLogs, todayKey };
 }

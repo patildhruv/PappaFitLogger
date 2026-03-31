@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import confetti from "canvas-confetti";
 import { useTimer } from "./hooks/useTimer";
 import { useLogs } from "./hooks/useLogs";
@@ -13,9 +13,10 @@ import WeeklyBarChart from "./components/WeeklyBarChart";
 import ManualLogger from "./components/ManualLogger";
 import Settings from "./components/Settings";
 
-function SplashScreen({ fading }) {
+function SplashScreen({ fading, onDismiss }) {
   return (
     <div
+      onClick={onDismiss}
       style={{
         position: "fixed",
         inset: 0,
@@ -25,6 +26,7 @@ function SplashScreen({ fading }) {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        cursor: "pointer",
         animation: fading ? "splashFadeOut 0.5s ease forwards" : "none",
       }}
     >
@@ -44,8 +46,31 @@ function SplashScreen({ fading }) {
       <div style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>
         Daily Fitness Tracker
       </div>
+      <div style={{ fontSize: 10, color: "var(--text-faint)", marginTop: 16 }}>
+        Tap to continue
+      </div>
     </div>
   );
+}
+
+function calcStreak(logs, activities) {
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const dayData = logs[key];
+    if (dayData && activities.some((a) => dayData[a.key])) {
+      streak++;
+    } else if (i === 0) {
+      // today might not have activity yet, skip
+      continue;
+    } else {
+      break;
+    }
+  }
+  return streak;
 }
 
 export default function App() {
@@ -58,9 +83,14 @@ export default function App() {
   function toggleInputMode() {
     setInputMode((m) => {
       const next = m === "timer" ? "manual" : "timer";
-      localStorage.setItem("pappa-fit-input-mode", next);
+      try { localStorage.setItem("pappa-fit-input-mode", next); } catch {}
       return next;
     });
+  }
+
+  function dismissSplash() {
+    setSplashFading(true);
+    setTimeout(() => setShowSplash(false), 500);
   }
 
   useEffect(() => {
@@ -73,7 +103,7 @@ export default function App() {
   }, []);
 
   const activities = useActivities();
-  const { logs, addLog, setDayNote, getToday, getMonth, getSortedDays, replaceAllLogs, mergeLogs, clearAllLogs, todayKey } = useLogs();
+  const { logs, addLog, editLog, setDayNote, getToday, getMonth, getSortedDays, replaceAllLogs, mergeLogs, clearAllLogs, todayKey } = useLogs();
 
   const handleTimerComplete = useCallback(
     (activityKey, minutes) => {
@@ -105,6 +135,7 @@ export default function App() {
 
   const totalMin = Object.values(todayData).reduce((s, v) => s + (typeof v === "number" ? v : 0), 0);
   const activeDaysThisMonth = Object.keys(monthData).length;
+  const streak = useMemo(() => calcStreak(logs, activities), [logs, activities]);
 
   return (
     <div
@@ -118,7 +149,7 @@ export default function App() {
         alignItems: "center",
       }}
     >
-      {showSplash && <SplashScreen fading={splashFading} />}
+      {showSplash && <SplashScreen fading={splashFading} onDismiss={dismissSplash} />}
 
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 20, maxWidth: 420, width: "100%", position: "relative" }}>
@@ -129,17 +160,23 @@ export default function App() {
             position: "absolute",
             left: 0,
             top: 0,
-            background: "none",
-            border: "none",
-            fontSize: 20,
+            background: "var(--card-bg)",
+            border: "1px solid var(--card-border)",
+            borderRadius: 10,
+            fontSize: 12,
+            fontWeight: 600,
             cursor: "pointer",
-            padding: 4,
-            opacity: 0.5,
+            padding: "4px 10px",
+            color: "var(--text-muted)",
+            fontFamily: "'DM Sans', sans-serif",
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
           }}
           aria-label={inputMode === "timer" ? "Switch to manual mode" : "Switch to timer mode"}
-          title={inputMode === "timer" ? "Manual mode" : "Timer mode"}
         >
-          {inputMode === "timer" ? "✏️" : "⏱️"}
+          {inputMode === "timer" ? "⏱️" : "✏️"}
+          <span style={{ fontSize: 10 }}>{inputMode === "timer" ? "Timer" : "Manual"}</span>
         </button>
         {/* Settings - right */}
         <button
@@ -152,7 +189,7 @@ export default function App() {
             border: "none",
             fontSize: 20,
             cursor: "pointer",
-            padding: 4,
+            padding: 8,
             opacity: 0.5,
           }}
           aria-label="Settings"
@@ -204,9 +241,9 @@ export default function App() {
             label: "Today",
           },
           {
-            value: activities.filter((a) => todayData[a.key]).length,
-            label: "Activities",
-            sub: `/${activities.length}`,
+            value: streak,
+            label: "Streak",
+            isStreak: true,
           },
         ].map((s, i) => (
           <div
@@ -221,10 +258,22 @@ export default function App() {
               border: "1px solid var(--card-border-strong)",
             }}
           >
-            <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
               {s.value}
               {s.sub && (
                 <span style={{ fontSize: 12, color: "var(--text-hint)", fontWeight: 500 }}>{s.sub}</span>
+              )}
+              {s.isStreak && streak > 0 && (
+                <span
+                  style={{
+                    fontSize: 20,
+                    display: "inline-block",
+                    animation: "flicker 0.8s ease-in-out infinite",
+                    transformOrigin: "bottom center",
+                  }}
+                >
+                  🔥
+                </span>
               )}
             </div>
             <div
@@ -272,6 +321,8 @@ export default function App() {
             todayData={todayData}
             dayNote={todayData.note || ""}
             onNoteChange={(text) => setDayNote(todayDateKey, text)}
+            onEditLog={editLog}
+            todayDateKey={todayDateKey}
             dateStr={dateStr}
             activeDays={activeDaysThisMonth}
             daysInMonth={daysInMonth}

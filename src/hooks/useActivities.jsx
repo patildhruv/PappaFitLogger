@@ -17,7 +17,9 @@ function loadActivities() {
 }
 
 function saveActivities(activities) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+  } catch {}
 }
 
 export function ActivitiesProvider({ children }) {

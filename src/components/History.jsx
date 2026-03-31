@@ -1,4 +1,4 @@
-import { useRef, useState, createRef } from "react";
+import { useRef, useState } from "react";
 import { useActivities } from "../hooks/useActivities";
 import { captureAndShare } from "../utils/shareCard";
 import ShareableCard from "./ShareableCard";

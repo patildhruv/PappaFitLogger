@@ -11,7 +11,28 @@ export default function ActivityDonut({ monthData }) {
   });
 
   const grandTotal = Object.values(totals).reduce((s, v) => s + v, 0);
-  if (grandTotal === 0) return null;
+  if (grandTotal === 0) {
+    return (
+      <div
+        style={{
+          background: "var(--card-bg)",
+          borderRadius: 18,
+          padding: "20px 12px",
+          maxWidth: 420,
+          width: "100%",
+          border: "1px solid var(--card-border)",
+          marginBottom: 16,
+          textAlign: "center",
+        }}
+      >
+        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 10, letterSpacing: 0.5, textTransform: "uppercase" }}>
+          Activity Distribution
+        </div>
+        <div style={{ fontSize: 24, marginBottom: 6 }}>📊</div>
+        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>No activities this month</div>
+      </div>
+    );
+  }
 
   const cx = 90;
   const cy = 90;

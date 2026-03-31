@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 
 const TIMER_KEY = "pappa-fit-active-timer";
 const DEFAULT_TITLE = "PappaFit Logger - Daily Fitness Tracker";
+const MAX_MINUTES = 480; // 8 hours
 
 function loadTimer() {
   try {
@@ -13,11 +14,13 @@ function loadTimer() {
 }
 
 function saveTimer(timer) {
-  if (timer) {
-    localStorage.setItem(TIMER_KEY, JSON.stringify(timer));
-  } else {
-    localStorage.removeItem(TIMER_KEY);
-  }
+  try {
+    if (timer) {
+      localStorage.setItem(TIMER_KEY, JSON.stringify(timer));
+    } else {
+      localStorage.removeItem(TIMER_KEY);
+    }
+  } catch {}
 }
 
 function computeElapsed(timer) {
@@ -97,7 +100,17 @@ export function useTimer(activities, onComplete) {
   const stopTimer = useCallback(() => {
     if (!activeTimer) return;
     const elapsedMs = computeElapsed(activeTimer);
-    const minutes = Math.max(1, Math.round(elapsedMs / 60000));
+    let minutes = Math.max(1, Math.round(elapsedMs / 60000));
+    if (minutes > MAX_MINUTES) {
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      if (!window.confirm(`Timer ran for ${h}h ${m}m. Log this amount?`)) {
+        setActiveTimer(null);
+        saveTimer(null);
+        document.title = DEFAULT_TITLE;
+        return;
+      }
+    }
     if (onComplete) {
       onComplete(activeTimer.activity, minutes);
     }

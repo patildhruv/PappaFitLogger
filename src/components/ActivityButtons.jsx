@@ -26,7 +26,7 @@ export default function ActivityButtons({ onStart, isRunning, activeActivity }) 
               flexDirection: "column",
               alignItems: "center",
               gap: 4,
-              padding: "14px 8px",
+              padding: "16px 8px",
               borderRadius: 14,
               border: isActive ? `2px solid ${a.color}` : "1.5px solid var(--card-border)",
               background: isActive
@@ -40,10 +40,10 @@ export default function ActivityButtons({ onStart, isRunning, activeActivity }) 
               fontFamily: "'DM Sans', sans-serif",
             }}
           >
-            <span style={{ fontSize: 24 }}>{a.emoji}</span>
+            <span style={{ fontSize: 28 }}>{a.emoji}</span>
             <span
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 600,
                 color: isActive ? a.color : "var(--text-secondary)",
               }}

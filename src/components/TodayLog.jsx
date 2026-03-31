@@ -3,13 +3,15 @@ import { useActivities } from "../hooks/useActivities";
 import { captureAndShare } from "../utils/shareCard";
 import ShareableCard from "./ShareableCard";
 
-export default function TodayLog({ todayData, dayNote, onNoteChange, dateStr, activeDays, daysInMonth }) {
+export default function TodayLog({ todayData, dayNote, onNoteChange, onEditLog, dateStr, activeDays, daysInMonth, todayDateKey }) {
   const activities = useActivities();
   const activeActivities = activities.filter((a) => todayData[a.key]);
   const totalMin = activeActivities.reduce((sum, a) => sum + todayData[a.key], 0);
   const [note, setNote] = useState(dayNote);
   const [sharing, setSharing] = useState(false);
-  const [toast, setToast] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [editing, setEditing] = useState(null); // activity key being edited
+  const [editValue, setEditValue] = useState("");
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -20,9 +22,27 @@ export default function TodayLog({ todayData, dayNote, onNoteChange, dateStr, ac
     const trimmed = note.trim();
     if (trimmed !== dayNote) {
       onNoteChange(trimmed);
-      setToast(true);
-      setTimeout(() => setToast(false), 1500);
+      showToast("Note saved");
     }
+  }
+
+  function showToast(msg) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 1500);
+  }
+
+  function startEdit(a) {
+    setEditing(a.key);
+    setEditValue(String(todayData[a.key]));
+  }
+
+  function saveEdit(activityKey) {
+    const newMin = parseInt(editValue) || 0;
+    if (onEditLog) {
+      onEditLog(todayDateKey, activityKey, newMin);
+    }
+    setEditing(null);
+    showToast(newMin <= 0 ? "Activity removed" : "Updated");
   }
 
   async function handleShare() {
@@ -89,9 +109,9 @@ export default function TodayLog({ todayData, dayNote, onNoteChange, dateStr, ac
                 style={{
                   background: "none",
                   border: "none",
-                  fontSize: 16,
+                  fontSize: 18,
                   cursor: sharing ? "wait" : "pointer",
-                  padding: "2px 4px",
+                  padding: "4px 6px",
                   opacity: sharing ? 0.4 : 0.6,
                   lineHeight: 1,
                 }}
@@ -105,20 +125,79 @@ export default function TodayLog({ todayData, dayNote, onNoteChange, dateStr, ac
             {activeActivities.map((a) => (
               <div
                 key={a.key}
+                onClick={() => !editing && startEdit(a)}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
                   background: `${a.color}15`,
-                  border: `1.5px solid ${a.color}30`,
+                  border: editing === a.key ? `2px solid ${a.color}` : `1.5px solid ${a.color}30`,
                   borderRadius: 10,
                   padding: "6px 10px",
+                  cursor: "pointer",
                 }}
               >
                 <span style={{ fontSize: 14 }}>{a.emoji}</span>
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 600, color: a.color }}>{a.label}</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>{todayData[a.key]} min</div>
+                  {editing === a.key ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <input
+                        type="number"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveEdit(a.key);
+                          if (e.key === "Escape") setEditing(null);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          width: 45,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          color: "var(--text-primary)",
+                          border: "1px solid var(--input-border)",
+                          borderRadius: 4,
+                          background: "var(--input-bg)",
+                          padding: "2px 4px",
+                          outline: "none",
+                          fontFamily: "'DM Sans', sans-serif",
+                        }}
+                      />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); saveEdit(a.key); }}
+                        style={{
+                          background: a.color,
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 4,
+                          padding: "2px 6px",
+                          fontSize: 10,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif",
+                        }}
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setEditing(null); }}
+                        style={{
+                          background: "none",
+                          color: "var(--text-faint)",
+                          border: "none",
+                          padding: "2px 4px",
+                          fontSize: 10,
+                          cursor: "pointer",
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>{todayData[a.key]} min</div>
+                  )}
                 </div>
               </div>
             ))}
@@ -165,7 +244,7 @@ export default function TodayLog({ todayData, dayNote, onNoteChange, dateStr, ac
             fontFamily: "'DM Sans', sans-serif",
           }}
         >
-          Note saved
+          {toast}
         </div>
       )}
     </div>
