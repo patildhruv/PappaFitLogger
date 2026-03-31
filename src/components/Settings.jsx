@@ -31,31 +31,46 @@ export default function Settings({ logs, onReplace, onMerge, onClearAll }) {
   function handleImport(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (fileRef.current) fileRef.current.value = "";
+
     const reader = new FileReader();
+    reader.onerror = () => {
+      setImportMsg("Could not read file. Try again.");
+    };
     reader.onload = (ev) => {
+      let parsed;
       try {
-        const parsed = JSON.parse(ev.target.result);
-        const importedLogs = parsed.logs || parsed;
-        if (typeof importedLogs !== "object" || Array.isArray(importedLogs)) {
-          setImportMsg("Invalid file format");
-          return;
-        }
+        parsed = JSON.parse(ev.target.result);
+      } catch {
+        setImportMsg("Invalid JSON file. Check the file format.");
+        return;
+      }
+
+      const importedLogs = parsed.logs || parsed;
+      if (typeof importedLogs !== "object" || Array.isArray(importedLogs)) {
+        setImportMsg("Invalid file format — expected logs object.");
+        return;
+      }
+
+      // Use setTimeout to ensure confirm dialog works on mobile
+      setTimeout(() => {
         const choice = window.confirm(
           "Merge with existing data?\n\nOK = Merge\nCancel = Replace all"
         );
-        if (choice) {
-          onMerge(importedLogs);
-        } else {
-          onReplace(importedLogs);
+        try {
+          if (choice) {
+            onMerge(importedLogs);
+          } else {
+            onReplace(importedLogs);
+          }
+          if (parsed.activities && Array.isArray(parsed.activities)) {
+            setAllActivities(parsed.activities);
+          }
+          setImportMsg("Data imported successfully!");
+        } catch (err) {
+          setImportMsg("Import failed: " + (err.message || "Unknown error"));
         }
-        if (parsed.activities && Array.isArray(parsed.activities)) {
-          setAllActivities(parsed.activities);
-        }
-        setImportMsg("Data imported successfully!");
-      } catch {
-        setImportMsg("Failed to read file");
-      }
-      if (fileRef.current) fileRef.current.value = "";
+      }, 100);
     };
     reader.readAsText(file);
   }
